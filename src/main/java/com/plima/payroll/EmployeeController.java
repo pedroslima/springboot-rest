@@ -15,8 +15,11 @@ public class EmployeeController {
 
   private final EmployeeRepository repository;
 
-  public EmployeeController(EmployeeRepository repository) {
+  private final EmployeeModelAssembler assembler;
+
+  public EmployeeController(EmployeeRepository repository, EmployeeModelAssembler assembler) {
     this.repository = repository;
+    this.assembler = assembler;
   }
 
   //Agregate root
@@ -24,9 +27,7 @@ public class EmployeeController {
   @GetMapping("/employees")
   CollectionModel<EntityModel<Employee>> all() {
     List<EntityModel<Employee>> employees = repository.findAll().stream()
-        .map(employee -> new EntityModel<Employee>(employee,
-            linkTo(methodOn(EmployeeController.class).one(employee.getId())).withSelfRel(),
-            linkTo(methodOn(EmployeeController.class).all()).withSelfRel()))
+        .map(assembler::toModel)
         .collect(Collectors.toList());
 
     return new CollectionModel<>(employees,
@@ -45,9 +46,7 @@ public class EmployeeController {
     Employee employee = repository.findById(id)
         .orElseThrow(() -> new EmployeeNotFoundException(id));
 
-    return new EntityModel<>(employee,
-        linkTo(methodOn(EmployeeController.class).one(id)).withSelfRel(),
-        linkTo(methodOn(EmployeeController.class).all()).withRel("employees"));
+    return assembler.toModel(employee);
   }
 
   @PutMapping("/employees/{id}")
