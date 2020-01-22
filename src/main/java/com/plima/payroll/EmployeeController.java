@@ -2,8 +2,10 @@ package com.plima.payroll;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,8 +37,12 @@ public class EmployeeController {
   }
 
   @PostMapping("/employees")
-  Employee newEmployee(@RequestBody Employee employee) {
-    return repository.save(employee);
+  ResponseEntity<EntityModel<Employee>> newEmployee(@RequestBody Employee newEmployee) throws URISyntaxException {
+    EntityModel<Employee> model = assembler.toModel(repository.save(newEmployee));
+
+    return ResponseEntity
+        .created(linkTo(methodOn(EmployeeController.class).newEmployee(newEmployee)).toUri())
+        .body(model);
   }
 
   // Single item
@@ -50,8 +56,8 @@ public class EmployeeController {
   }
 
   @PutMapping("/employees/{id}")
-  Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
-    return repository.findById(id)
+  ResponseEntity<EntityModel<Employee>> replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
+    Employee updatedEmployee = repository.findById(id)
         .map(employee -> {
           employee.setName(newEmployee.getName());
           employee.setRole(newEmployee.getRole());
@@ -60,10 +66,18 @@ public class EmployeeController {
           newEmployee.setId(id);
           return repository.save(newEmployee);
         });
+
+    EntityModel<Employee> model = assembler.toModel(updatedEmployee);
+
+    return ResponseEntity
+        .created(linkTo(methodOn(EmployeeController.class).replaceEmployee(newEmployee, id)).toUri())
+        .body(model);
+
   }
 
   @DeleteMapping("/employees/{id}")
-  void deleteEmployee(@PathVariable Long id) {
+  ResponseEntity<?> deleteEmployee(@PathVariable Long id) {
     repository.deleteById(id);
+    return ResponseEntity.noContent().build();
   }
 }
