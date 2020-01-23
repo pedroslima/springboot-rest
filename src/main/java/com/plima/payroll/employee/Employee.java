@@ -1,4 +1,4 @@
-package com.plima.payroll;
+package com.plima.payroll.employee;
 
 import lombok.Data;
 

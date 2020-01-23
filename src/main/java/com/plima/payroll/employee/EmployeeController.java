@@ -1,4 +1,4 @@
-package com.plima.payroll;
+package com.plima.payroll.employee;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -24,7 +24,7 @@ public class EmployeeController {
     this.assembler = assembler;
   }
 
-  //Agregate root
+
 
   @GetMapping("/employees")
   CollectionModel<EntityModel<Employee>> all() {

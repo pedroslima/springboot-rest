@@ -1,4 +1,4 @@
-package com.plima.payroll;
+package com.plima.payroll.employee;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
